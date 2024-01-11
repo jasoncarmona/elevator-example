@@ -15,6 +15,7 @@ namespace Interview.Application.Elevator {
       public Dictionary<int, List<ElevatorRequest>> CallFloorRequests { get; set; }
       public Dictionary<int, List<ElevatorRequest>> DestinyFloorRequests { get; set; }
 
+      public ILogger Logger { get; set; }
       public List<ElevatorLogRecord> Logs { get; set; }
 
       public ElevatorDirection Direction { get; set; }
@@ -23,11 +24,12 @@ namespace Interview.Application.Elevator {
       public int CurrentTime { get; set; }
       public int Capacity { get; set; }
 
-      public Elevator() {
+      public Elevator(ILogger logger) {
          this.CurrentFloor = new Floor() { Number = MIN_FLOOR };
          this.Capacity = Elevator.DEFAULT_CAPACITY;
          this.Direction = ElevatorDirection.Up;
          this.Status = ElevatorStatus.Idle;
+         this.Logger = logger;
 
          this.CallFloorRequests = new Dictionary<int, List<ElevatorRequest>>(MAX_FLOOR + 1);
          this.DestinyFloorRequests = new Dictionary<int, List<ElevatorRequest>>(MAX_FLOOR + 1);
@@ -61,7 +63,7 @@ namespace Interview.Application.Elevator {
             this.DestinyFloorRequests[this.CurrentFloor.Number].ForEach(elevatorRequest => {
                this.Capacity++;
                elevatorRequest.SetDestinyProcessed(true);
-               Console.WriteLine($"Request processed -> {elevatorRequest.ToString()}");
+               this.Logger.Log($"Elevator: Request processed -> {elevatorRequest.ToString()}");
             });
             this.DestinyFloorRequests[this.CurrentFloor.Number].Clear();
 
@@ -91,24 +93,22 @@ namespace Interview.Application.Elevator {
       }
 
       private void IncreaseWaitingTime(int time) {
-         foreach (var (key, requests) in this.CallFloorRequests) {
-            requests.ForEach(request => request.IncreaseTime(time));
-         }
-         foreach (var (key, requests) in this.DestinyFloorRequests) {
-            requests.ForEach(request => request.IncreaseTime(time));
-         }
+         foreach (var (key, requests) in this.CallFloorRequests) requests.ForEach(request => request.IncreaseTime(time));
+
+         foreach (var (key, requests) in this.DestinyFloorRequests) requests.ForEach(request => request.IncreaseTime(time));
       }
 
       private bool GetNewDirection(out ElevatorDirection newDirection) {
-         if (this.Direction == ElevatorDirection.Up &&
-            (this.CallFloorRequests.Any(pairValue => pairValue.Key > this.CurrentFloor.Number && pairValue.Value.Count > 0)
-            || this.DestinyFloorRequests.Any(pairValue => pairValue.Key > this.CurrentFloor.Number && pairValue.Value.Count > 0))) {
+         bool upRequests = this.CallFloorRequests.Any(pair => pair.Key > this.CurrentFloor.Number && pair.Value.Count > 0)
+            || this.DestinyFloorRequests.Any(pair => pair.Key > this.CurrentFloor.Number && pair.Value.Count > 0);
+         bool downRequests = this.CallFloorRequests.Any(pair => pair.Key < this.CurrentFloor.Number && pair.Value.Count > 0)
+            || this.DestinyFloorRequests.Any(pair => pair.Key < this.CurrentFloor.Number && pair.Value.Count > 0);
+
+         if ((this.Direction == ElevatorDirection.Up && upRequests) || (this.Direction == ElevatorDirection.Down && !downRequests && upRequests)) {
             newDirection = ElevatorDirection.Up;
             return true;
          }
-         if (this.Direction == ElevatorDirection.Down &&
-            (this.CallFloorRequests.Any(pairValue => pairValue.Key < this.CurrentFloor.Number && pairValue.Value.Count > 0) ||
-            this.DestinyFloorRequests.Any(pairValue => pairValue.Key < this.CurrentFloor.Number && pairValue.Value.Count > 0))) {
+         if ((this.Direction == ElevatorDirection.Down && downRequests) || (this.Direction == ElevatorDirection.Up && !upRequests && downRequests)) {
             newDirection = ElevatorDirection.Down;
             return true;
          }
@@ -141,8 +141,7 @@ namespace Interview.Application.Elevator {
             People = String.Join("-", people.ToArray()),
          };
          this.Logs.Add(logEntry);
-         Console.WriteLine(logEntry.ToString());
+         this.Logger.Log($"Elevator: {logEntry.ToString()}");
       }
    }
 }
-

@@ -12,16 +12,12 @@ namespace Interview.Infrastructure.Files {
       public string PathToFile { get; set; } = String.Empty;
 
       public void BuildElevatorLogFile(IEnumerable<ElevatorLogRecord> records) {
-         //using var writter = new StreamWriter(this.PathToFile);
-         //using var memoryStream = new MemoryStream();
-         using (var streamWriter = new StreamWriter(this.PathToFile)) { // memoryStream
+         using (var streamWriter = new StreamWriter(this.PathToFile)) {
             using var csvWriter = new CsvWriter(streamWriter, CultureInfo.InvariantCulture);
 
             csvWriter.Context.RegisterClassMap<ElevatorLogMap>();
             csvWriter.WriteRecords(records);
          }
-         //writter.Write(memoryStream);
-         //return memoryStream.ToArray();
       }
    }
 }

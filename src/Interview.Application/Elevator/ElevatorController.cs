@@ -19,9 +19,11 @@ namespace Interview.Application.Elevator {
 
       public ILogger Logger { get; set; }
 
-      public ElevatorController() {
+      public ElevatorController(ILogger logger, ICsvFileGenerator csvFileGenerator) {
+         this.Logger = logger;
+         this.CsvFileGenerator = csvFileGenerator;
          this.OperationStrategy = new SpeedStrategy();
-         this.Elevators.Add(new Elevator());
+         this.Elevators.Add(new Elevator(logger));
          this.CurrentTime = 0;
          
       }
@@ -34,7 +36,7 @@ namespace Interview.Application.Elevator {
             }
          }
          this.CsvFileGenerator.BuildElevatorLogFile(this.Elevators.First().Logs);
-         Console.WriteLine("No more pending requests, finishing thread");
+         this.Logger.Log("Controller: No more pending requests, finishing thread");
       }
 
       private void TryToProcessRequest(object? state) {
@@ -43,7 +45,7 @@ namespace Interview.Application.Elevator {
          // this is because there's only one elevator, if not, this would be set by the operation strategy
          var elevatorTime = this.Elevators.First().CurrentTime;
 
-         Console.WriteLine($"Current time {elevatorTime} : {DateTime.Now}");
+         this.Logger.Log($"Controller: Current time ticker {elevatorTime}");
 
          ElevatorRequest elevatorRequest;
          while (this.RawElevatorRequests.TryPeek(out elevatorRequest!) && elevatorRequest.CallingTime <= elevatorTime) {
@@ -51,7 +53,7 @@ namespace Interview.Application.Elevator {
             var elevator = this.OperationStrategy.getElevator(this.Elevators, elevatorRequest);
             elevator.ProcessCall(nextElevatorRequest);
 
-            Console.WriteLine($"Sending request to controller {nextElevatorRequest.ToString()}");
+            this.Logger.Log($"Controller: Sending request to controller -> {nextElevatorRequest.ToString()}");
          }
       }
 

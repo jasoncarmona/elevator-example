@@ -9,9 +9,9 @@ namespace Interview.Application.Common.Interfaces {
       public int CurrentTime { get; set; }
       public List<ElevatorLogRecord> Logs { get; set; }
 
-      public void ProcessCall(ElevatorRequest elevatorRequest);
+      public ILogger Logger { get; set; }
 
-      //public void ProcessDestiny(int floorNumber);
+      public void ProcessCall(ElevatorRequest elevatorRequest);
 
       public void ProcessTick();
 

@@ -19,7 +19,6 @@ namespace Interview.Infrastructure.Files {
       }
 
       //public DataTable ReadElevatorRequestsFile(string pathToFile) {
-      //   //pathToFile = "path\\to\\file.csv";
       //   using var reader = new StreamReader(pathToFile);
       //   using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
       //   using (var dr = new CsvDataReader(csv))
@@ -29,9 +28,7 @@ namespace Interview.Infrastructure.Files {
       //      dt.Columns.Add("CallingFloor", typeof(int));
       //      dt.Columns.Add("DestinyFloor", typeof(int));
       //      dt.Columns.Add("CallingTime", typeof(DateTime));
-
       //      dt.Load(dr);
-
       //      return dt;
       //   }
       //}

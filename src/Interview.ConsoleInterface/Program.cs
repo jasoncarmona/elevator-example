@@ -4,15 +4,12 @@ using Interview.Infrastructure.Files;
 using Interview.Infrastructure.Services;
 using Interview.Application.Common.Interfaces;
 using Interview.Application.Elevator;
-using Interview.Domain;
 using Autofac;
-using static System.Formats.Asn1.AsnWriter;
 
 
 namespace Interview.Application {
    public class Program {
 
-      //private static IContainer _container;
       private static IContainer? Container { get; set; }
 
 
@@ -20,19 +17,12 @@ namespace Interview.Application {
 
          Container = ConfigureDependencies();
 
-         using (var scope = Container.BeginLifetimeScope()) {
-            var logger = scope.Resolve<ILogger>();
-            
-            logger.Log("teseting resolution");
-         }
-
          CommandLine.Parser.Default.ParseArguments<CommandLineOptions>(args)
             .WithParsed(RunOptions)
             .WithNotParsed(HandleParseError);
       }
 
       private static IContainer ConfigureDependencies() {
-         // Register default dependencies in the application container.
          var builder = new ContainerBuilder();
          builder.RegisterType<Logger>().As<ILogger>().InstancePerDependency();
          builder.RegisterType<CsvFileGenerator>().As<ICsvFileGenerator>().SingleInstance();
@@ -57,11 +47,7 @@ namespace Interview.Application {
             var elevatorRequests = csvFileReader.ReadElevatorRequestsFile(opts.InputFilePath);
 
             elevatorController.RawElevatorRequests = new Queue<ElevatorRequest>(elevatorRequests!);
-            elevatorController.CsvFileGenerator = csvFileGenerator;
-            elevatorController.Logger = logger;
             elevatorController.ProcessRequests();
-
-            //foreach (var request in elevatorRequests!) logger.Log(request.ToString());
          }
       }
 
