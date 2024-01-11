@@ -1,0 +1,32 @@
+﻿id,callingFloor,destinyFloor,callTime
+a,1,8,0
+b,9,2,1
+c,4,10,3
+d,8,1,4
+e,6,7,4
+f,7,10,6
+g,6,8,7
+h,7,10,8
+i,4,10,9
+
+
+currentTime,currentFloor,status,nextStopsCall,nextStopsDestiny
+
+0   1   iddle   -   -
+
+0   1   moving  -       8
+1   2   moving  9       8                   *
+2   3   moving  4,9     8
+3   4   moving  9       8,10
+
+4   5   moving  8,9     8,10                *
+4   5   moving  6,8,9   8,10                *
+
+5   6   moving  8,9     7,8,10              *
+6   7   moving  [7],8,9 8,10                *
+
+7   8   moving  6-9     1,10                *
+8   9   moving  6,7-    1,2,10              *
+9   10  moving  4,6,7-  1,2,4               *
+-----------------------------------------------------
+10  9  moving  4,6,7-  1,2,4                *
